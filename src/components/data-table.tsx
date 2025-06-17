@@ -99,16 +99,34 @@ export function DataTable<TData>({
 
     function globalStringFilter<TData>(
         row: Row<TData>,
-        columnId: string,
+        _columnId: string,
         filterValue: string
     ): boolean {
-        const value = row.getValue(columnId)
+        // Obtener todos los valores como texto plano
+        const rowValues = row
+            .getAllCells()
+            .map(cell => {
+                const value = cell.getValue();
+                if (value === null || value === undefined) return '';
+                if (typeof value === 'string' || typeof value === 'number') {
+                    return String(value).toLowerCase();
+                }
+                try {
+                    return JSON.stringify(value).toLowerCase();
+                } catch {
+                    return '';
+                }
+            })
+            .join(' ');
 
-        if (typeof value === "string" || typeof value === "number") {
-            return String(value).toLowerCase().includes(filterValue.toLowerCase())
-        }
+        // Convertir todo en minúsculas para búsqueda case-insensitive
+        const haystack = rowValues.toLowerCase();
 
-        return false
+        // Separar términos por espacio
+        const terms = filterValue.toLowerCase().split(/\s+/).filter(Boolean);
+
+        // Verificar que todos los términos existan en el contenido total
+        return terms.every(term => haystack.includes(term));
     }
 
     function countLeafColumns(columns: ColumnDef<TData>[]): number {
