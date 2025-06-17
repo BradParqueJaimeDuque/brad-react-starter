@@ -1,0 +1,4 @@
+User-agent: *
+Disallow: /private/
+Allow: /
+Sitemap: https://registro-invitados.portaljaimeduque.net/sitemap.xml
